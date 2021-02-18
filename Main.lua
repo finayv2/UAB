@@ -16,7 +16,7 @@ for i,v in pairs(getnilinstances()) do
     if v:IsA("LocalScript") or v:IsA("ModuleScript") then
         if not string.find(decompile(v), "Synapse X generated script.") then
             rconsoleprint('@@RED@@')
-            rconsoleprint('\nScript Detected in NIL : '.. v.Name)
+            rconsoleprint('\n'.. v.ClassName .. ' Detected in NIL : '.. v.Name)
         end
     end
 end
@@ -32,15 +32,18 @@ for I,V in pairs(game:GetChildren()) do
     if V.Name == "Workspace" or V.Name == "Players" or V.Name == "ReplicatedFirst" or V.Name == "StarterPlayer" or V.Name == "StarterPack" or V.Name == "StarterGui" or V.Name == "ReplicatedStorage" then
         for i,v in pairs(V:GetDescendants()) do
             if string.find(string.lower(v.Name), "anti") or string.match(string.lower(v.Name), "exploit") or string.match(string.lower(v.Name), "kick") or string.match(string.lower(v.Name), "log") or string.match(string.lower(v.Name), "cheat") then
-                rconsoleprint('@@RED@@')
-                rconsoleprint('\n'.. v.ClassName .. ' Detected in '.. v.Parent.Name .. ' : '.. v.Name)
+                if v.Name == "MessageLogDisplay" or v.Name == "Frame_MessageLogDisplay" then
+                else
+                    rconsoleprint('@@RED@@')
+                    rconsoleprint('\n'.. v.ClassName .. ' Detected in '.. v.Parent.Name .. ' : '.. v.Name)
+                    
+                end
             end
         end
     end
 end
 
 --rconsolewarn
-
 rconsoleprint('@@WHITE@@')
 
 for i,v in pairs(game:GetService("JointsService"):GetChildren()) do
@@ -101,6 +104,19 @@ OldHook = hookfunction(Instance.new'RemoteEvent'.FireServer, newcclosure(functio
     end
     
     return OldHook(Remote, unpack(HookArgs))
+end))
+
+VeryOlderHook = hookfunction(Instance.new'RemoteFunction'.InvokeServer, newcclosure(function(Remote, ...)
+    local InvokeHookArgs = {...}
+
+    rconsoleprint('@@YELLOW@@')
+    rconsolewarn(''..Remote.Name..' Fired With .InvokeServer args: '.. unpack(InvokeHookArgs))
+
+    if getgenv().BypassMode then
+        return wait(9e9)
+    end
+    
+    return VeryOlderHook(Remote, unpack(InvokeHookArgs))
 end))
 
 rconsoleprint('\nUniversal Anticheat Bypass - Scanning Complete!\n\n')
