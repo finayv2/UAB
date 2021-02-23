@@ -1,9 +1,17 @@
-getgenv().BypassMode = false
+getgenv().BypassMode = true
+getgenv().Executed = false
 
 
 if not syn then print("Exploit not supported") return end
 
-rconsolename("Universal Anticheat Bypass - finay#1197")
+
+rconsoleclear()
+
+for i,v in pairs(getconnections(game:GetService("ScriptContext").Error)) do
+    v:Disable()
+end
+
+rconsolename("Universal Anticheat Bypass - finay#1197 (346165398846046208)")
 
 rconsoleprint('\nUniversal Anticheat Bypass - Scanning Instances...\n')
 
@@ -14,7 +22,12 @@ setreadonly(mt, false)
 
 for i,v in pairs(getnilinstances()) do
     if v:IsA("LocalScript") or v:IsA("ModuleScript") then
-        if not string.find(decompile(v), "Synapse X generated script.") then
+        if not string.find(decompile(v, 30), "Synapse X generated script.") then
+            if getgenv().BypassMode then
+                for p,connection in pairs(getconnections(v.Changed)) do
+                    connection:Disable()
+                end
+            end
             rconsoleprint('@@RED@@')
             rconsoleprint('\n'.. v.ClassName .. ' Detected in NIL : '.. v.Name)
         end
@@ -24,19 +37,31 @@ end
 local Whitelisted = {
     [1] = "Frame_MessageLogDisplay";
     [2] = "MessageLogDisplay";
+    [3] = "Logo"
 }
 
 --GetDescendants
+
+local DetectedScripts = {}
 
 for I,V in pairs(game:GetChildren()) do
     if V.Name == "Workspace" or V.Name == "Players" or V.Name == "ReplicatedFirst" or V.Name == "StarterPlayer" or V.Name == "StarterPack" or V.Name == "StarterGui" or V.Name == "ReplicatedStorage" then
         for i,v in pairs(V:GetDescendants()) do
             if string.find(string.lower(v.Name), "anti") or string.match(string.lower(v.Name), "exploit") or string.match(string.lower(v.Name), "kick") or string.match(string.lower(v.Name), "log") or string.match(string.lower(v.Name), "cheat") then
-                if v.Name == "MessageLogDisplay" or v.Name == "Frame_MessageLogDisplay" then
+                if v.Name == "MessageLogDisplay" or v.Name == "Frame_MessageLogDisplay" or v.Name == "Logo" then
                 else
+                    if getgenv().BypassMode then
+                        for p,connection in pairs(getconnections(v.Changed)) do
+                            connection:Disable()
+                        end
+                    end
                     rconsoleprint('@@RED@@')
                     rconsoleprint('\n'.. v.ClassName .. ' Detected in '.. v.Parent.Name .. ' : '.. v.Name)
-                    
+
+                    if v:IsA("LocalScript") then
+                        DetectedScripts[#DetectedScripts + 1] = v      
+                    end 
+
                 end
             end
         end
@@ -45,13 +70,6 @@ end
 
 --rconsolewarn
 rconsoleprint('@@WHITE@@')
-
-for i,v in pairs(game:GetService("JointsService"):GetChildren()) do
-    if v:IsA("RemoteEvent") then
-        rconsolewarn('Universal Anticheat Bypass - Bypassed Adnois Anticheat')
-        v:Destroy()
-    end
-end
 
 rconsoleprint('@@WHITE@@')
 
@@ -75,6 +93,8 @@ mt.__namecall = newcclosure(function(self, ...)
 
         return wait(9e9)
     end
+
+
 
     if string.find(string.lower(self.Name), "anti") or string.match(string.lower(self.Name), "exploit") or string.match(string.lower(self.Name), "kick") or string.match(string.lower(self.Name), "log") or string.match(string.lower(self.Name), "cheat") then
         if not checkcaller() then
@@ -120,3 +140,26 @@ VeryOlderHook = hookfunction(Instance.new'RemoteFunction'.InvokeServer, newcclos
 end))
 
 rconsoleprint('\nUniversal Anticheat Bypass - Scanning Complete!\n\n')
+
+for i,v in pairs(game:GetService("JointsService"):GetChildren()) do
+    if v:IsA("RemoteEvent") then
+        rconsolewarn('Universal Anticheat Bypass - Bypassed Adnois Anticheat')
+        v:Destroy()
+    end
+end
+
+if getgenv().BypassMode then
+
+    for i = 1, #DetectedScripts do
+        DetectedScripts[i].Disabled = true
+        DetectedScripts[i]:Remove()
+    end
+
+    if #DetectedScripts >= 1 then
+        rconsoleprint('\nUniversal Anticheat Bypass - Bypass Successful\n\n')
+    else
+        rconsoleprint('\nUniversal Anticheat Bypass - Nothing to Bypass\n\n')
+    end
+end
+
+getgenv().Executed = true
