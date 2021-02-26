@@ -1,24 +1,22 @@
-getgenv().BypassMode = true
-getgenv().Executed = false
-
-
-if not syn then print("Exploit not supported") return end
-
-
 rconsoleclear()
 
-for i,v in pairs(getconnections(game:GetService("ScriptContext").Error)) do
-    v:Disable()
-end
+getgenv().BypassMode = true
+
+local bluec, redc, yellowc, whitec = function(...) rconsoleprint('@@BLUE@@') rconsoleprint(...) end, function(...) rconsoleprint('@@RED@@') rconsoleprint(...) end, function(...) rconsoleprint('@@YELLOW@@') rconsoleprint(...) end, function(...) rconsoleprint('@@WHITE@@') rconsoleprint(...) end
+
+for i,v in pairs(getconnections(game:GetService("ScriptContext").Error)) do v:Disable() end
 
 rconsolename("Universal Anticheat Bypass - finay#1197 (346165398846046208)")
 
-rconsoleprint('\nUniversal Anticheat Bypass - Scanning Instances...\n')
+whitec('Universal Anticheat Bypass - Scanning Instances...\n\n')
 
 local mt = getrawmetatable(game)
 local oldNamecall = mt.__namecall
 
 setreadonly(mt, false)
+
+local DetectedScripts = {}
+local DetectedRemotes = {}
 
 for i,v in pairs(getnilinstances()) do
     if v:IsA("LocalScript") or v:IsA("ModuleScript") then
@@ -28,39 +26,38 @@ for i,v in pairs(getnilinstances()) do
                     connection:Disable()
                 end
             end
-            rconsoleprint('@@RED@@')
-            rconsoleprint('\n'.. v.ClassName .. ' Detected in NIL : '.. v.Name)
+
+            DetectedScripts[#DetectedScripts + 1] = v    
+
+            redc(v.ClassName .. ' Detected in NIL : '.. v.Name.. "\n")
         end
+    elseif v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
+        redc(v.ClassName .. ' Detected in NIL : '.. v.Name.. "\n")
+
+        DetectedRemotes[#DetectedRemotes + 1] = v.Name
     end
 end
 
-local Whitelisted = {
-    [1] = "Frame_MessageLogDisplay";
-    [2] = "MessageLogDisplay";
-    [3] = "Logo"
-}
-
---GetDescendants
-
-local DetectedScripts = {}
 
 for I,V in pairs(game:GetChildren()) do
     if V.Name == "Workspace" or V.Name == "Players" or V.Name == "ReplicatedFirst" or V.Name == "StarterPlayer" or V.Name == "StarterPack" or V.Name == "StarterGui" or V.Name == "ReplicatedStorage" then
         for i,v in pairs(V:GetDescendants()) do
             if string.find(string.lower(v.Name), "anti") or string.match(string.lower(v.Name), "exploit") or string.match(string.lower(v.Name), "kick") or string.match(string.lower(v.Name), "log") or string.match(string.lower(v.Name), "cheat") then
-                if v.Name == "MessageLogDisplay" or v.Name == "Frame_MessageLogDisplay" or v.Name == "Logo" then
+                if v.Name == "MessageLogDisplay" or v.Name == "Frame_MessageLogDisplay" or v.Name == "Logo" or v.Name == "Dialogue" then
                 else
-                    if getgenv().BypassMode then
-                        for p,connection in pairs(getconnections(v.Changed)) do
-                            connection:Disable()
+                    if not string.match(string.lower(v.Name), "logo") then
+                        if getgenv().BypassMode then
+                            for p,connection in pairs(getconnections(v.Changed)) do
+                                connection:Disable()
+                            end
                         end
-                    end
-                    rconsoleprint('@@RED@@')
-                    rconsoleprint('\n'.. v.ClassName .. ' Detected in '.. v.Parent.Name .. ' : '.. v.Name)
 
-                    if v:IsA("LocalScript") then
-                        DetectedScripts[#DetectedScripts + 1] = v      
-                    end 
+                        redc(v.ClassName .. ' Detected in '.. v.Parent.Name .. ' : '.. v.Name .. "\n")
+
+                        if v:IsA("LocalScript") then
+                            DetectedScripts[#DetectedScripts + 1] = v    
+                        end  
+                    end
 
                 end
             end
@@ -68,17 +65,20 @@ for I,V in pairs(game:GetChildren()) do
     end
 end
 
---rconsolewarn
-rconsoleprint('@@WHITE@@')
-
-rconsoleprint('@@WHITE@@')
+function CheckNilRemotes(Instance)
+    for i,v in pairs(DetectedRemotes) do
+        if Instance.Name == v then
+            return true
+        end
+    end
+end
 
 hookfunction(game.Players.LocalPlayer.Kick, newcclosure(function(Player, ...)
     local KickReason = {...}
 
-    rconsoleprint('@@YELLOW@@')
+    yellowc(getcallingscript().Name..' Attempted To Kick you reason: '.. '"' .. unpack(KickReason)..'"\n')
 
-    rconsoleprint(''..getcallingscript().Name..' Attempted To Kick you reason: '.. '"' .. unpack(KickReason)..'"')
+    return wait(9e9)
 end))
 
 mt.__namecall = newcclosure(function(self, ...)
@@ -87,21 +87,15 @@ mt.__namecall = newcclosure(function(self, ...)
 
 
     if Method == "Kick" then
-        rconsoleprint('@@WHITE@@')
-
-        rconsolewarn(''..getcallingscript().Name..' Attempted To Kick you reason: '.. '"' .. unpack(args)..'"')
+        whitec(getcallingscript().Name..' Attempted To Kick you reason: '.. '"' .. unpack(args)..'"\n')
 
         return wait(9e9)
     end
 
-
-
-    if string.find(string.lower(self.Name), "anti") or string.match(string.lower(self.Name), "exploit") or string.match(string.lower(self.Name), "kick") or string.match(string.lower(self.Name), "log") or string.match(string.lower(self.Name), "cheat") then
+    if string.find(string.lower(self.Name), "anti") or string.match(string.lower(self.Name), "exploit") or string.match(string.lower(self.Name), "kick") or string.match(string.lower(self.Name), "log") or string.match(string.lower(self.Name), "cheat") or CheckNilRemotes(self.Name) then
         if not checkcaller() then
             if not self.Name == "Frame_MessageLogDisplay" or not self.Name == "sex" then
-                rconsoleprint('@@WHITE@@')
-
-                rconsolewarn(''..self.Name..' Fired With Trigger Word args: '.. unpack(args))
+                whitec(self.Name..' Fired With Trigger Word args: '.. unpack(args))
 
                 if getgenv().BypassMode then
                     return wait(9e9)
@@ -113,53 +107,60 @@ mt.__namecall = newcclosure(function(self, ...)
     return oldNamecall(self, unpack(args))
 end)
 
-OldHook = hookfunction(Instance.new'RemoteEvent'.FireServer, newcclosure(function(Remote, ...)
+FireHook, InvokeHook = hookfunction(Instance.new'RemoteEvent'.FireServer, newcclosure(function(Remote, ...)
     local HookArgs = {...}
 
-    rconsoleprint('@@YELLOW@@')
-    rconsolewarn(''..Remote.Name..' Fired With .FireServer args: '.. unpack(HookArgs))
+    yellowc(Remote.Name..' Fired With .FireServer args: '.. unpack(HookArgs))
 
     if getgenv().BypassMode then
         return wait(9e9)
     end
     
-    return OldHook(Remote, unpack(HookArgs))
-end))
-
-VeryOlderHook = hookfunction(Instance.new'RemoteFunction'.InvokeServer, newcclosure(function(Remote, ...)
+    return FireHook(Remote, unpack(HookArgs))
+end)), hookfunction(Instance.new'RemoteFunction'.InvokeServer, newcclosure(function(Remote, ...)
     local InvokeHookArgs = {...}
 
-    rconsoleprint('@@YELLOW@@')
-    rconsolewarn(''..Remote.Name..' Fired With .InvokeServer args: '.. unpack(InvokeHookArgs))
+    yellowc(Remote.Name..' Fired With .InvokeServer args: '.. unpack(InvokeHookArgs))
 
     if getgenv().BypassMode then
         return wait(9e9)
     end
     
-    return VeryOlderHook(Remote, unpack(InvokeHookArgs))
+    return InvokeHook(Remote, unpack(InvokeHookArgs))
 end))
 
-rconsoleprint('\nUniversal Anticheat Bypass - Scanning Complete!\n\n')
+
+
+whitec('\nUniversal Anticheat Bypass - Scanning Complete!\n\n')
 
 for i,v in pairs(game:GetService("JointsService"):GetChildren()) do
     if v:IsA("RemoteEvent") then
-        rconsolewarn('Universal Anticheat Bypass - Bypassed Adnois Anticheat')
+        bluec('Universal Anticheat Bypass - Bypassed Adnois Anticheat')
         v:Destroy()
     end
 end
 
+
+
 if getgenv().BypassMode then
 
     for i = 1, #DetectedScripts do
-        DetectedScripts[i].Disabled = true
+        if DetectedScripts[i]:IsA("LocalScript") then
+            DetectedScripts[i].Disabled = true
+        end
         DetectedScripts[i]:Remove()
     end
 
     if #DetectedScripts >= 1 then
-        rconsoleprint('\nUniversal Anticheat Bypass - Bypass Successful\n\n')
-    else
-        rconsoleprint('\nUniversal Anticheat Bypass - Nothing to Bypass\n\n')
+        bluec('\nUniversal Anticheat Bypass - Bypass Successful\n')
     end
+
 end
 
-getgenv().Executed = true
+bluec('\nUniversal Anticheat Bypass - Cystral AC')
+
+hookfunction(game.GetDescendants, function()
+    if not checkcaller() then
+        return {}
+    end
+end)
