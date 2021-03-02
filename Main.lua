@@ -38,7 +38,6 @@ for i,v in pairs(getnilinstances()) do
     end
 end
 
-
 for I,V in pairs(game:GetChildren()) do
     if V.Name == "Workspace" or V.Name == "Players" or V.Name == "ReplicatedFirst" or V.Name == "StarterPlayer" or V.Name == "StarterPack" or V.Name == "StarterGui" or V.Name == "ReplicatedStorage" then
         for i,v in pairs(V:GetDescendants()) do
@@ -76,7 +75,7 @@ end
 hookfunction(game.Players.LocalPlayer.Kick, newcclosure(function(Player, ...)
     local KickReason = {...}
 
-    yellowc(getcallingscript().Name..' Attempted To Kick you reason: '.. '"' .. unpack(KickReason)..'"\n')
+    yellowc('\n'..getcallingscript():GetFullName()..' Attempted To Kick you reason: '.. '"' .. unpack(KickReason)..'"')
 
     return wait(9e9)
 end))
@@ -87,9 +86,15 @@ mt.__namecall = newcclosure(function(self, ...)
 
 
     if Method == "Kick" then
-        whitec(getcallingscript().Name..' Attempted To Kick you reason: '.. '"' .. unpack(args)..'"\n')
+        whitec('\n'..getcallingscript():GetFullName()..' Attempted To Kick you reason: '.. '"' .. unpack(args)..'"')
 
         return wait(9e9)
+    end
+
+    if Method == "GetPropertyChangedSignal" then
+        whitec('\n'..getcallingscript():GetFullName() ..' Attempted To Call Signal '.. '"' .. args[1] ..'"') 
+
+        return
     end
 
     if string.find(string.lower(self.Name), "anti") or string.match(string.lower(self.Name), "exploit") or string.match(string.lower(self.Name), "kick") or string.match(string.lower(self.Name), "log") or string.match(string.lower(self.Name), "cheat") or CheckNilRemotes(self.Name) then
@@ -157,10 +162,12 @@ if getgenv().BypassMode then
 
 end
 
-bluec('\nUniversal Anticheat Bypass - Cystral AC')
-
-hookfunction(game.GetDescendants, function()
-    if not checkcaller() then
-        return {}
-    end
-end)
+if game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("ModuleScript") then
+    hookfunction(game.GetDescendants, function()
+        if not checkcaller() then
+            return {}
+        end
+    end)
+    
+    bluec('\nUniversal Anticheat Bypass - Cystral AC')
+end
