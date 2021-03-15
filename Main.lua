@@ -51,10 +51,12 @@ for I,V in pairs(game:GetChildren()) do
                             end
                         end
 
-                        redc(v.ClassName .. ' Detected in '.. v.Parent.Name .. ' : '.. v.Name .. "\n")
+                        redc(v.ClassName .. ' Detected in '.. v:GetFullName() .. ' : '.. v.Name .. "\n")
 
                         if v:IsA("LocalScript") then
                             DetectedScripts[#DetectedScripts + 1] = v    
+                        elseif v:IsA("RemoteEvent") or v:IsA("RemoteFunction") then
+                            DetectedRemotes[#DetectedRemotes + 1] = v.Name
                         end  
                     end
 
@@ -86,23 +88,34 @@ mt.__namecall = newcclosure(function(self, ...)
 
 
     if Method == "Kick" then
-        whitec('\n'..getcallingscript():GetFullName()..' Attempted To Kick you reason: '.. '"' .. unpack(args)..'"')
+        if not checkcaller() then
+            whitec('\n'..getcallingscript():GetFullName()..' Attempted To Kick you reason: '.. '"' .. unpack(args)..'"')
 
-        return wait(9e9)
+            return wait(9e9)
+        end
     end
+
 
     if Method == "GetPropertyChangedSignal" then
-        whitec('\n'..getcallingscript():GetFullName() ..' Attempted To Call Signal '.. '"' .. args[1] ..'"') 
+        if not checkcaller() then
+            whitec("niggP")
+            if args[1] == "Disabled" then
+                whitec('\n'..getcallingscript():GetFullName() ..' Attempted To Call Signal '.. '"' .. args[1] ..'"') 
 
-        return
+                return
+            end
+        end
     end
 
-    if string.find(string.lower(self.Name), "anti") or string.match(string.lower(self.Name), "exploit") or string.match(string.lower(self.Name), "kick") or string.match(string.lower(self.Name), "log") or string.match(string.lower(self.Name), "cheat") or CheckNilRemotes(self.Name) then
+
+    if Method == "FireServer" and string.find(string.lower(self.Name), "anti") or string.match(string.lower(self.Name), "exploit") or string.match(string.lower(self.Name), "kick") or string.match(string.lower(self.Name), "log") or string.match(string.lower(self.Name), "cheat") or CheckNilRemotes(self) then
         if not checkcaller() then
-            if not self.Name == "Frame_MessageLogDisplay" or not self.Name == "sex" then
-                whitec(self.Name..' Fired With Trigger Word args: '.. unpack(args))
+            if self.Name == "Frame_MessageLogDisplay" or self.Name == "sex" then
+            else
+                yellowc('\n'.. self.Name ..' Fired With Trigger Word args: '.. '"' .. unpack(args)..'"')
 
                 if getgenv().BypassMode then
+                    redc('\nBlocked '.. self.Name .. " From Firing!")
                     return wait(9e9)
                 end
             end
@@ -135,7 +148,6 @@ end)), hookfunction(Instance.new'RemoteFunction'.InvokeServer, newcclosure(funct
 end))
 
 
-
 whitec('\nUniversal Anticheat Bypass - Scanning Complete!\n\n')
 
 for i,v in pairs(game:GetService("JointsService"):GetChildren()) do
@@ -144,8 +156,6 @@ for i,v in pairs(game:GetService("JointsService"):GetChildren()) do
         v:Destroy()
     end
 end
-
-
 
 if getgenv().BypassMode then
 
@@ -157,17 +167,18 @@ if getgenv().BypassMode then
     end
 
     if #DetectedScripts >= 1 then
-        bluec('\nUniversal Anticheat Bypass - Bypass Successful\n')
+        bluec('\n\nUniversal Anticheat Bypass - Bypass Successful\n')
     end
 
 end
 
-if game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("ModuleScript") then
+if game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("LocalScript") then
+
     hookfunction(game.GetDescendants, function()
         if not checkcaller() then
             return {}
         end
     end)
     
-    bluec('\nUniversal Anticheat Bypass - Cystral AC')
+    bluec('\nUniversal Anticheat Bypass - Cystral AC\n')
 end
