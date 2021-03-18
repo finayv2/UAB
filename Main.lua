@@ -22,9 +22,15 @@ for i,v in pairs(getnilinstances()) do
     if v:IsA("LocalScript") or v:IsA("ModuleScript") then
         if not string.find(decompile(v, 30), "Synapse X generated script.") then
             if getgenv().BypassMode then
+
                 for p,connection in pairs(getconnections(v.Changed)) do
                     connection:Disable()
                 end
+
+                for id,u in pairs(getconnections(v:GetPropertyChangedSignal("Disabled"))) do
+                    u:Disable()
+                end
+
             end
 
             DetectedScripts[#DetectedScripts + 1] = v    
@@ -95,19 +101,6 @@ mt.__namecall = newcclosure(function(self, ...)
         end
     end
 
-
-    if Method == "GetPropertyChangedSignal" then
-        if not checkcaller() then
-            whitec("niggP")
-            if args[1] == "Disabled" then
-                whitec('\n'..getcallingscript():GetFullName() ..' Attempted To Call Signal '.. '"' .. args[1] ..'"') 
-
-                return
-            end
-        end
-    end
-
-
     if Method == "FireServer" and string.find(string.lower(self.Name), "anti") or string.match(string.lower(self.Name), "exploit") or string.match(string.lower(self.Name), "kick") or string.match(string.lower(self.Name), "log") or string.match(string.lower(self.Name), "cheat") or CheckNilRemotes(self) then
         if not checkcaller() then
             if self.Name == "Frame_MessageLogDisplay" or self.Name == "sex" then
@@ -161,6 +154,14 @@ if getgenv().BypassMode then
 
     for i = 1, #DetectedScripts do
         if DetectedScripts[i]:IsA("LocalScript") then
+            for id,u in pairs(getconnections(v:GetPropertyChangedSignal("Disabled"))) do
+                u:Disable()
+            end
+
+            for id,u in pairs(getconnections(v.Changed)) do
+                u:Disable()
+            end
+
             DetectedScripts[i].Disabled = true
         end
         DetectedScripts[i]:Remove()
@@ -182,3 +183,5 @@ if game.Players.LocalPlayer.Character:FindFirstChildWhichIsA("LocalScript") then
     
     bluec('\nUniversal Anticheat Bypass - Cystral AC\n')
 end
+
+setreadonly(mt, true)
