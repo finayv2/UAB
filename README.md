@@ -1,5 +1,4 @@
 # UAB
 Universal Anticheat Bypass
 
-
-nigger
+bypasses every local sided anticheat please dont try in paid games btw or your etarded
